@@ -1,0 +1,25 @@
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+out/
+service_account.json
+.venv/
+venv/
+node_modules/
+.clasp.json
+.clasprc.json
+package-lock.json
+.gstack/
+.preview-tmp/
+
+# local scratch (CV text extractions, one-off checks)
+*_check.txt
+*_structure.txt
+dyson_hits.json
+epicgames_stripped.txt
+general_jan.txt
+live_now.txt
+mistral_en.txt
+sharify_raw.txt
+strip_rtf.py

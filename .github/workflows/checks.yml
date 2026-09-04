@@ -1,0 +1,38 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  code:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -e .[dev,scrape,jobspy]
+
+      - name: Lint
+        run: python -m ruff check src tests
+
+      - name: Python tests
+        run: python -m pytest tests -q
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # The dashboard is plain ES5 in one big string; run.sh runs it against a
+      # fake Spreadsheet and then in jsdom. Nothing else type-checks or even
+      # parses this code, so CI is the only thing standing between a typo and
+      # a blank dashboard.
+      - name: Dashboard tests
+        run: bash tests/dashboard/run.sh

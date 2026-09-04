@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "jobbank": {
+      "command": "python",
+      "args": ["-m", "jobbank", "mcp"]
+    }
+  }
+}

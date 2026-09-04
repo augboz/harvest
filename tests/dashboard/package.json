@@ -1,0 +1,1 @@
+{ "name": "dashboard-tests", "private": true, "devDependencies": { "jsdom": "^29" } }

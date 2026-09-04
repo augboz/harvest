@@ -1,0 +1,215 @@
+# Local defaults. When a Google Sheet is connected, the editable config cells
+# on the Stats tab override: weekly_cap, min_score, digest_to.
+# Bank size is governed by the CEILING, not by the weekly rate: nothing leaves a
+# bank on its own, so a per-week cap alone let it stack up to 31 open roles.
+bank_ceiling: 10        # the size the open list aims for. Every run may use
+                        # whatever space is under it, but only a role clearing
+                        # min_score takes one — an empty slot is not an
+                        # obligation to fill it.
+bank_overflow: 5        # a role that is exceptional or closing this week may
+                        # push this far past the ceiling: missing one of those
+                        # costs more than a slightly long list
+max_per_company: 3      # one employer may not fill the bank
+weekly_cap: 10          # secondary rate limit: additions in any 7-day window
+admit_all_qualifying: true
+                        # ...except that this turns both size caps off: anything
+                        # clearing min_score is banked however long the list is.
+                        # In the ten days to 25/08/2026 the caps archived 33
+                        # roles scoring 78-82 for want of space, while the bank
+                        # held roles the LLM later scored in the forties. Nothing
+                        # is ever evicted to make room — the list just grows —
+                        # and max_per_company still stops one employer taking it
+                        # over. Safe only because min_score does the real work
+                        # now that the LLM scores again: while it was down the
+                        # keyword heuristic put everything at 80, and nothing is
+                        # bank-eligible at all when it fails.
+min_score: 75           # the real gate; only genuinely-fitting roles clear this
+watchlist_min_relief: 15  # a WATCHED company's role banks from 60: Sony/Disney
+                        # intern roles sat archived at 48-72 for weeks while the
+                        # bar was 75 for everyone — companies watched
+                        # precisely in order to hear about them
+priority_score: 85      # >= this may take a free slot below the ceiling early
+freshness_days: 45      # drop postings older than this unless a future deadline is stated
+digest_to: you@example.com
+
+# Per-company hard rules, checked before anything is scored. Substring match on
+# company; a rule's location_any means "reject unless the location mentions one
+# of these".
+company_rules:
+  # 2026-09-02: Aug has ONE TikTok application left, so only a Europe-based
+  # software intern role is worth surfacing — everything else is a slot he
+  # cannot spend. TikTok floods every board with US variants (34 archived).
+  - company: TikTok
+    location_any: [london, paris, united kingdom, uk, france, germany, berlin, munich, netherlands, amsterdam, ireland, dublin, spain, madrid, barcelona, italy, milan, poland, warsaw, switzerland, zurich, europe, emea]
+
+dedupe:
+  fuzzy_threshold: 92   # rapidfuzz token_sort_ratio on "company title"
+
+scorer:
+  model: claude-haiku-4-5-20251001
+  batch_size: 12          # bigger batches = fewer calls = less prompt overhead
+  max_jobs_per_run: 400   # safety valve on LLM spend
+  # Two-stage scoring: everything gets a free heuristic rank, then only the top
+  # N go to the LLM. Keeps a run to ~2-4 cents instead of ~22. Only these N can
+  # enter the Job Bank. Raise if you feel good roles are being missed.
+  llm_top_n: 50
+  description_chars: 1200   # trim JD text sent to the LLM (biggest cost driver)
+
+# Workday-hosted career sites. Phase 2 of the watchlist: 40 of its 84 companies
+# are typed `ats: careers` and were never fetched by anything at all. Workday is
+# the cleanest slice — a public JSON endpoint, proper pagination, and robots that
+# allows the career-site paths. Add a company by pointing at its tenant:
+# the careers URL https://HOST/SITE/... gives you host and site, and the tenant is
+# the first label of the host (ag.wd3.myworkdayjobs.com -> tenant "ag").
+workday:
+  # where Aug can actually work. Tenants that reject the facet (NVIDIA's)
+  # fall back to an unfiltered search and are filtered later like any
+  # other source.
+  countries: [UK, France, Germany, Spain, Netherlands, Italy]
+  terms: [intern, placement, graduate]
+  per_page: 20
+  max_pages: 2
+  detail_cap: 30        # descriptions cost a second request each; a 2000-job
+                        # tenant would otherwise be 2000 of them
+  sites:
+    - name: Airbus Defence & Space
+      host: ag.wd3.myworkdayjobs.com
+      tenant: ag
+      site: Airbus
+    # 2026-09-02, added on request. Both tenants verified answering. Neither
+    # exposes the locationCountry facet, so like NVIDIA they fall back to an
+    # unfiltered search and the hard filters do the geography.
+    - name: Disney
+      host: disney.wd5.myworkdayjobs.com
+      tenant: disney
+      site: disneycareer
+    - name: Sony Electronics
+      host: sonyglobal.wd1.myworkdayjobs.com
+      tenant: sonyglobal
+      site: SonyGlobalCareers
+    - name: NVIDIA
+      host: nvidia.wd5.myworkdayjobs.com
+      tenant: nvidia
+      site: NVIDIAExternalCareerSite
+    - name: Thales
+      host: thales.wd3.myworkdayjobs.com
+      tenant: thales
+      site: Careers
+
+# Pinpoint-hosted career sites. One request per company, descriptions included.
+# The slug is the subdomain: astonmartinf1.pinpointhq.com -> astonmartinf1.
+pinpoint:
+  sites:
+    - name: Aston Martin F1
+      slug: astonmartinf1
+
+github_boards:
+  - repo: speedyapply/2027-SWE-College-Jobs
+    branch: main
+    files: [README.md]
+  - repo: speedyapply/2027-AI-College-Jobs
+    branch: main
+    files: [README.md]
+  - repo: vanshb03/Summer2027-Internships
+    branch: dev
+    files: [README.md]
+  - repo: jobright-ai/2026-Software-Engineer-Internship
+    branch: master
+    files: [README.md]
+  - repo: jobright-ai/2026-Data-Analysis-Internship
+    branch: master
+    files: [README.md]
+
+adzuna:
+  # each term can restrict countries; default = all listed countries
+  countries: [gb, fr, de, nl, it, es, us, ca, ch, sg]
+  terms:
+    - {q: software placement, countries: [gb]}
+    - {q: industrial placement software, countries: [gb]}
+    - {q: software engineering internship 2027}
+    - {q: machine learning internship}
+    - {q: "stage ingénieur logiciel", countries: [fr]}
+  results_per_page: 50
+  max_pages: 2          # trial-tier request limits: keep queries targeted
+
+reed:
+  keywords:
+    - software industrial placement
+    - software placement year
+    - machine learning internship
+    - software engineering intern 2027
+  max_results_per_term: 100
+
+# Employer career sites that only exist once JavaScript has run. Dyson is the
+# reason: its listings are absent from the HTML, the sitemap and any reachable
+# API, and its graduate roles only appear behind ?q=graduate. Each entry costs
+# one browser page-load per query, so keep the list short and the queries sharp.
+# Needs `playwright install chromium`; without it the fetcher logs and skips.
+headless_careers:
+  enabled: true
+  sites:
+    - company: Dyson
+      url: https://careers.dyson.com/en-gb/search-results/
+      # Checked 2026-08-17: Dyson had no software internship listed — their only
+      # intern role was retail marketing, and their graduate engineering roles
+      # are the wrong TYPE for Aug. Kept anyway because their placement cycle
+      # opens in the autumn and this is the only way those roles are visible.
+      queries: [intern, placement]
+      wait_ms: 7000
+
+jobspy:
+  enabled: true
+  # linkedin/glassdoor often blocked from CI IPs; indeed+google are reliable.
+  sites: [indeed, google]
+  terms:
+    - software engineer intern
+    - machine learning intern
+    - 12 month placement software
+    - audio software intern
+    - motorsport software placement
+    - data engineering intern
+  locations:
+    - {location: "London, UK", country_indeed: UK}
+    - {location: "United Kingdom", country_indeed: UK}
+    - {location: "Paris, France", country_indeed: France}
+    - {location: "Remote", country_indeed: UK}
+    - {location: "Canada", country_indeed: Canada}
+    - {location: "Switzerland", country_indeed: Switzerland}
+    - {location: "Singapore", country_indeed: Singapore}
+  results_wanted: 20
+  hours_old: 220        # ~9 days: covers a weekly run with slack
+  proxies: []           # optional list of "user:pass@host:port"
+
+hiringcafe:
+  # interest-area queries; commitment filtered to Internship in the fetcher
+  queries:
+    - software engineer intern
+    - machine learning intern
+    - data engineer intern
+    - audio software intern
+    - motorsport software
+  max_per_query: 40
+
+trackr:
+  enabled: true
+
+aidevjobs:
+  enabled: true
+
+placement_boards:
+  ratemyplacement: true
+  gradcracker: true
+  welcometothejungle: true
+  hyrd: true
+
+# Ashby job boards (AI startups not on Greenhouse/Lever). Add orgs freely — the
+# org is the slug in jobs.ashbyhq.com/<org>.
+ashby:
+  # verified 2026-07-22 (runwayml/anthropic/mistral are NOT on Ashby)
+  orgs: [perplexity, cohere, elevenlabs, suno, character, harvey, sierra,
+         cursor, decagon, baseten, modal, fireworks, replit, vercel, supabase,
+         linear, lovable, n8n, poolside, dust, browserbase, runway, photoroom,
+         deepgram,
+         # startup-tracker additions (2026-08-27), all slugs verified live:
+         synthesia, improbable, oxa, sorare, gladia, alan, backmarket,
+         hcompany, 1password, ideogram, deepl, notion, ramp]

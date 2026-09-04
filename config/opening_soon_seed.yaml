@@ -1,0 +1,35 @@
+# Programmes that predictably open but aren't live yet (spec sec 6). Seeds the
+# Opening Soon tab on first run; deduped against existing rows so re-runs don't
+# duplicate.
+#
+# WHAT expected_open MEANS: the date the pipeline should START LOOKING for the
+# real posting. It is not a claim about when applications open. Most of these
+# are guesses at a likely month written as the 1st of it, so the dashboard shows
+# them as "Expected September", never as "Opens in 13 days", and a row only
+# becomes "OPEN NOW" when a matching posting is actually found (see
+# opening_soon_evidence.py).
+#
+# status: use "Announced" ONLY when the employer has published an actual date —
+# that is the one case the dashboard shows a countdown to a specific day.
+# Everything else stays "Predicted from last year" and is displayed as a month.
+# Put the basis for a prediction in notes so the next person knows what it rests
+# on rather than having to trust a bare date.
+#
+# status: Announced | Predicted from last year
+# Target window: 2027 summer internships + 2027-28 year-in-industry placements.
+
+entries:
+  # --- F1 team industrial placements (open autumn 2026 for 2027-28) ---
+  - {company: Mercedes-AMG F1, programme: Industrial Placement (Software/Data), expected_open: 2026-09-15, expected_close: 2026-11-30, status: Predicted from last year, link: "https://www.mercedesamgf1.com/careers", notes: "Basis: mercedesamgf1.com/careers/industrial-placements states technical placements open September 2026 for the 2027 intake (checked 2026-08-19). The month is theirs; the day is not, so the card shows a month."}
+  - {company: Red Bull Racing, programme: Undergraduate Placement (Software), expected_open: "", expected_close: 2026-12-15, status: Predicted from last year, link: "https://www.redbullracing.com/int-en/careers"}
+  - {company: McLaren Racing, programme: Industrial Placement (Software Engineering), expected_open: "", expected_close: 2026-11-30, status: Predicted from last year, link: "https://racingcareers.mclaren.com/early-careers", notes: "Their early careers page showed no live vacancies on 2026-08-19 and calls this a 13-month internship, not an industrial placement. No open date known."}
+  - {company: Williams Racing, programme: Placement Year (Software/Systems), expected_open: "", expected_close: 2026-12-31, status: Predicted from last year, link: "https://www.williamsf1.com/pages/careers"}
+  - {company: Aston Martin F1, programme: Industrial Placement (Software), expected_open: "", expected_close: 2026-12-01, status: Predicted from last year, link: "https://www.astonmartinf1.com/en-GB/careers"}
+  - {company: Alpine F1, programme: Placement (Software/Data), expected_open: "", expected_close: 2026-12-31, status: Predicted from last year, link: "https://www.alpinecars.com/en/formula-1/careers/"}
+  - {company: Sauber / Audi F1, programme: Internship/Placement (Software), expected_open: "", expected_close: 2026-12-01, status: Predicted from last year, link: "https://www.sauber-group.com/careers/"}
+  # --- Big-tech internship cycles (predicted from prior year) ---
+  - {company: Google, programme: Software Engineering Intern 2027 (EMEA), expected_open: "", expected_close: 2027-01-31, status: Predicted from last year, link: "https://careers.google.com/students/", notes: "STEP + SWE intern cycle opens early autumn"}
+  - {company: Microsoft, programme: Software Engineering Intern 2027, expected_open: "", expected_close: 2027-02-28, status: Predicted from last year, link: "https://careers.microsoft.com/students/"}
+  - {company: Meta, programme: Software Engineer Intern 2027 (London), expected_open: "", expected_close: 2026-12-31, status: Predicted from last year, link: "https://www.metacareers.com/jobs"}
+  - {company: Nvidia, programme: Engineering Intern 2027, expected_open: "", expected_close: 2027-01-31, status: Predicted from last year, link: "https://www.nvidia.com/en-us/about-nvidia/careers/university-recruiting/"}
+  - {company: ESA, programme: Young Graduate Trainee / Student placement, expected_open: "", expected_close: 2027-01-31, status: Predicted from last year, link: "https://jobs.esa.int", notes: "EU-only; ITAR-safe"}

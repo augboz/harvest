@@ -1,0 +1,47 @@
+[project]
+name = "harvest"
+version = "0.1.0"
+description = "Automated job-search pipeline: 15+ sources in, LLM-scored shortlist out to a Google Sheets job bank"
+requires-python = ">=3.11"
+dependencies = [
+    "httpx>=0.27",
+    "beautifulsoup4>=4.12",
+    "rapidfuzz>=3.9",
+    "gspread>=6.1",
+    "google-auth>=2.30",
+    # Upper bound deliberate: `>=0.40` silently resolved to 1.0.0 in CI on
+    # 2026-08-25 while local dev sat on 0.116 — a major SDK bump landing
+    # unannounced in a scheduled pipeline. Verified: the whole suite and a live
+    # scoring call both pass on 1.0.0. Raise the ceiling on purpose, not by drift.
+    "anthropic>=1.0,<2",
+    "PyYAML>=6.0",
+    "openpyxl>=3.1",
+    "python-dateutil>=2.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+# Upper bound deliberate, same reasoning as anthropic above: fastmcp majors
+# land fast (2->4 inside 2025-26) and the server should not ride one silently.
+mcp = ["fastmcp>=4,<5"]               # `python -m jobbank mcp` — job bank as MCP tools
+scrape = ["curl_cffi>=0.7"]           # Cloudflare-protected boards (gradcracker, hiringcafe)
+jobspy = ["python-jobspy>=1.1.80"]    # Indeed/LinkedIn/Glassdoor/Google/ZipRecruiter (heavy: pandas)
+headless = ["playwright>=1.47"]       # employer career sites that only render under JS (Dyson)
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff.lint]
+# Named explicitly because ruff's DEFAULT rule set is not stable across
+# versions: 0.15 checked E4/E7/E9/F, 0.16 turned isort (I) on as well and 17
+# untouched files started failing lint on the version gap alone. Naming the
+# rules means your machine and CI agree whatever ruff each happens to have.
+# To adopt import sorting later: add "I" here and run `ruff check --fix src tests`.
+select = ["E4", "E7", "E9", "F"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

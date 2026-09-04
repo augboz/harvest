@@ -1,0 +1,12 @@
+# Target-company ATS watchlist. Seeds the sheet's Watchlist tab; once the
+# sheet is live, the tab is the source of truth and this file is the fallback.
+# ats: greenhouse | lever | workday | careers | ashby
+# slug: the ATS board token. Unverified slugs are marked verify: true and the
+# fetcher logs (not crashes) when a board 404s.
+#
+# Example entries — replace with the companies you care about.
+
+companies:
+  - {name: Stripe, ats: greenhouse, slug: stripe}
+  - {name: Spotify, ats: lever, slug: spotify, verify: true}
+  - {name: Example Corp, ats: careers, url: "https://example.com/careers", verify: true}
