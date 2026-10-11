@@ -23,3 +23,12 @@ live_now.txt
 mistral_en.txt
 sharify_raw.txt
 strip_rtf.py
+
+# retrieval layer: the built index (raw record text) and the private eval set
+rag_index/
+private/
+.venv-rag/
+out/deploy_ctx/
+agent/jobbank_agent/.adk/
+.venv/
+*.egg-info/

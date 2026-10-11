@@ -118,7 +118,14 @@ def main() -> int:
     sugp.add_argument("--root", help="profile directory (default: repo root)")
     sub.add_parser("mcp", help="serve the job bank as MCP tools over stdio "
                                "(needs the [mcp] extra; profiles are per tool call)")
+    ragp = sub.add_parser("rag", help="retrieval layer: snapshot | build | search | stats | eval "
+                                      "(needs the [rag] extra)")
+    ragp.add_argument("rest", nargs=argparse.REMAINDER)
     args = parser.parse_args()
+
+    if args.cmd == "rag":
+        from .rag.cli import main as rag_main
+        return rag_main(args.rest)
 
     if args.cmd == "mcp":
         from .mcp_server import mcp

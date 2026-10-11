@@ -18,7 +18,7 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - run: pip install -e .[dev,scrape,jobspy]
+      - run: pip install -e .[dev,scrape,jobspy,mcp,rag]
 
       - name: Lint
         run: python -m ruff check src tests
